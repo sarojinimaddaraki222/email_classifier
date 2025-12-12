@@ -1,0 +1,71 @@
+email_text,category,urgency
+"My internet has been down for 5 hours, please resolve this immediately.",complaint,high
+Your app crashes every time I try to upload a document.,complaint,high
+The delivery arrived late again this week.,complaint,medium
+I am still waiting for my refund even after repeated reminders.,complaint,medium
+The technician did not show up for the scheduled appointment.,complaint,medium
+The product quality is very poor compared to what was advertised.,complaint,medium
+Support team is not responding to my earlier emails.,complaint,high
+I received an incomplete package; half the items are missing.,complaint,high
+Your service has become very slow recently.,complaint,low
+I was double charged for the same order.,complaint,high
+The issue I reported last month is still unresolved.,complaint,medium
+Your automated calls are extremely annoying.,complaint,low
+Please help me change my registered mobile number.,request,medium
+Can you share the invoice for my last order?,request,low
+I want to upgrade my plan to the premium tier.,request,low
+Kindly reset my password as I am unable to login.,request,medium
+Please confirm the delivery date for my order.,request,medium
+I would like to update my shipping address.,request,medium
+Can you extend my warranty by one more year?,request,low
+Please provide the installation instructions.,request,low
+I want to reactivate my suspended account.,request,medium
+Can you enable international roaming on my number?,request,medium
+Please resend the activation link.,request,medium
+I need a duplicate copy of my receipt.,request,low
+Great service! The support team resolved my issue quickly.,feedback,low
+I really like your new dashboard design.,feedback,low
+The delivery was smooth and faster than expected.,feedback,low
+Your team handled my request with great professionalism.,feedback,low
+The product performance has improved significantly.,feedback,low
+Thank you for the quick response yesterday.,feedback,low
+The new update makes the app more user-friendly.,feedback,low
+Appreciate the prompt support from your team.,feedback,low
+Satisfied with the recent service experience.,feedback,low
+Your live chat support is very helpful.,feedback,low
+The new features are a good addition.,feedback,low
+Keep up the good work team.,feedback,low
+Congratulations! You won a free iPhone. Click here.,spam,low
+Limited period offer! Claim cashback now.,spam,low
+"Your account will be blocked, verify immediately.",spam,low
+Win a trip to Dubai. Register now!,spam,low
+You have been selected for a special reward.,spam,low
+Huge discount on electronics! Check link below.,spam,low
+Urgent: Your system is infected. Install antivirus now.,spam,low
+Your parcel is waiting for confirmation. Click to release.,spam,low
+"Earn ₹10,000 per day by working from home.",spam,low
+Your payment is pending. Click here to verify.,spam,low
+Exclusive membership just for you.,spam,low
+Lucky draw winner! Claim your prize now.,spam,low
+Your UPI ID has been suspended. Confirm immediately.,spam,low
+Get free crypto tokens. Join now.,spam,low
+"My order has been stuck in processing for three days, please look into this urgently.",complaint,high
+The replacement product you sent also has defects.,complaint,medium
+Can you activate the corporate discount for my account?,request,medium
+Please update my email ID on your records.,request,low
+I am impressed with how fast your team responded last night.,feedback,low
+The new chatbot feature is quite helpful.,feedback,low
+Final chance to claim your free reward!,spam,low
+"Your credit card will be suspended, verify now!",spam,low
+"My account was debited twice, please reverse the extra charge ASAP.",complaint,high
+Is it possible to pause my subscription for one month?,request,low
+The technician resolved my issue within minutes. Great job!,feedback,low
+Join today and win exclusive prizes!,spam,low
+The app is freezing frequently after the latest patch.,complaint,medium
+Please deactivate auto-renewal on my subscription.,request,medium
+"The new billing layout is easier to understand, thanks!",feedback,low
+Claim your exclusive cash prize now.,spam,low
+"I am unable to track my package, kindly assist.",request,medium
+Your service executive was extremely helpful today.,feedback,low
+This is to report unauthorized login attempts on my account.,complaint,high
+You have been chosen for a special crypto giveaway!,spam,low
