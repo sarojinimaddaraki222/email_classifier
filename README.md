@@ -1,40 +1,48 @@
-AI-Powered Smart Email Classifier
-Infosys Springboard Internship - Milestone 1
-Sarojini Maddaraki - Batch 8/9/10
-Overview:
-Email classification system that automatically categorizes emails and assigns urgency levels.
+# AI-Powered Smart Email Classifier
 
-Project Structure:
-email_classifier/
-├── data/
-│   ├── raw/
-│   │   ├── enron.csv
-│   │   ├── enterprice_email_dataset.csv
-│   │   └── spam.csv
-│   └── cleaned/
-│       ├── spam_cleaned.csv
-│       ├── enron_cleaned.csv
-│       ├── support_cleaned.csv
-│       ├── combined_emails.csv
-│       └── labeled_emails.csv
-├── src/
-│   ├── preprocess_spam.py
-│   ├── preprocess_enron.py
-│   ├── preprocess_support.py
-│   ├── combine_datasets.py
-│   ├── labelling.py
-│
-├── requirements.txt
-├── LICENSE
-└── README.md
+**Infosys Springboard Internship - Milestone 1**
 
-Installation:
+## Description
+This project automatically categorizes emails and assigns urgency levels using keyword-based text classification.
+
+##Installation
 pip install pandas
 
-Output:
-Final dataset: data/cleaned/labeled_emails.csv
-Contains:
-cleaned_text - Cleaned email content
-category - Email category (spam, work, personal, support, finance, general)
-urgency - Urgency level (high, medium, low)
-source - DATASET_SOURCE.md(It has drive link to download dataset)
+## How to Run
+
+Run the preprocessing scripts in order:
+
+```bash
+cd src
+python preprocess_spam.py
+python preprocess_emails(enron).py
+python preprocess_enterprise_email_dataset.py
+python final_combined_dataset.py
+python labelling.py
+```
+
+## Features
+- Data cleaning and preprocessing
+- Removes noise from email text
+- Categorizes emails into: spam, work, personal, support, finance, general
+- Assigns urgency levels: high, medium, low
+
+## Datasets
+- Enron emails
+- Enterprise email dataset 
+- Spam emails
+
+## Output
+Final labeled dataset with categories and urgency levels
+
+## Milestone 1 Tasks Completed
+ Data collection  
+ Text cleaning and noise removal  
+ Email categorization  
+ Urgency level labeling
+
+## Author
+Sarojini Maddaraki - Batch 8/9/10
+
+## License
+MIT License
