@@ -17,9 +17,9 @@ Run the preprocessing scripts in order:
 ```bash
 cd src
 python preprocess_spam.py
-python preprocess_enron.py
-python preprocess_support.py
-python combine_datasets.py
+python preprocess_emails(enron).py
+python preprocess_enterprise_email_dataset.py
+python final_combined_datasets.py
 python labelling.py
 ```
 
@@ -31,7 +31,7 @@ python labelling.py
 
 ## Datasets
 - Enron emails
-- Support emails
+- Enterprise email dataset 
 - Spam emails
 
 ## Output
