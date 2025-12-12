@@ -5,8 +5,10 @@
 ## Description
 This project automatically categorizes emails and assigns urgency levels using keyword-based text classification.
 
-##Installation
+## Installation
+```bash
 pip install pandas
+```
 
 ## How to Run
 
@@ -15,9 +17,9 @@ Run the preprocessing scripts in order:
 ```bash
 cd src
 python preprocess_spam.py
-python preprocess_emails(enron).py
-python preprocess_enterprise_email_dataset.py
-python final_combined_dataset.py
+python preprocess_enron.py
+python preprocess_support.py
+python combine_datasets.py
 python labelling.py
 ```
 
@@ -29,7 +31,7 @@ python labelling.py
 
 ## Datasets
 - Enron emails
-- Enterprise email dataset 
+- Support emails
 - Spam emails
 
 ## Output
