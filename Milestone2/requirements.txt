@@ -1,0 +1,24 @@
+# Core Data Science
+pandas
+numpy
+
+# Machine Learning
+scikit-learn
+
+# Deep Learning
+torch
+transformers
+accelerate
+
+# NLP Processing
+nltk
+
+# Utilities
+tqdm
+
+# Visualization (optional)
+matplotlib
+seaborn
+
+# Model Saving
+joblib
