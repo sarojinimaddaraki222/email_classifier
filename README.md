@@ -104,7 +104,7 @@ Develop an NLP-based classification system using baseline and transformer models
 **Method:** TF-IDF vectorization (1000 features) + Multinomial Naive Bayes
 
 ### 3. DistilBERT (Transformer Model)
-**Overall Accuracy: ~82-85% (Expected)**
+**Overall Accuracy: 69%**
 #### Expected Performance Matrix
 | Metric | Complaints | Feedback | Requests | Spam | Weighted Avg |
 |--------|-----------|----------|----------|------|--------------|
