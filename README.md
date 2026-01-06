@@ -183,14 +183,14 @@ python distilBert.py
 - Classification reports with all metrics
 - Model comparison and analysis
 
-### Milestone 3: Urgency Detection & Scoring
+## Milestone 3 : Urgency Prediction
 Objective
 Implement urgency prediction using ML and rule-based approaches to prioritize critical emails.
 
 Urgency Distribution
 Urgency LevelCountPercentageMedium41,62183.2%High6,11312.2%Low2,2654.5%
 
-# Approach 1: Rule Based, ML Based and Hybrid (Rule + ML)
+# Aroach 1: Rule Based, ML Based and Hybrid (Rule + ML)
 Method: Rule-based for explicit signals, ML for contextual analysis
 # Hybrid Accuracy : 0.80
 
