@@ -56,11 +56,6 @@ Automated email classification system that categorizes emails into complaints, r
 ### Objective
 Develop an NLP-based classification system using baseline and transformer models.
 
-### Tasks Completed
-✅ Trained baseline classifiers (Logistic Regression, Naive Bayes)  
-✅ Fine-tuned transformer model (DistilBERT)  
-✅ Evaluated classification accuracy with detailed metrics
-
 ## Dataset Information
 - **Total Emails:** 503,044
 - **Training Set:** 402,435 emails (80%)
@@ -166,22 +161,6 @@ python distilBert.py
 - **NLTK** - Text preprocessing
 - **Pandas & NumPy** - Data manipulation
 
-## Project Structure
-
-```
-email_classifier/
-├── data/
-│   └── cleaned/
-│       └── labeled_emails.csv (503,044 emails)
-├── Milestone2/
-│   ├── logistic_regression.py
-│   ├── naive_bayes.py
-│   └── distilbert_simple.py
-├── requirements.txt
-├── LICENSE
-└── README.md
-```
-
 ## Evaluation Metrics Explained
 
 - **Accuracy** - Percentage of correct predictions overall
@@ -203,6 +182,70 @@ email_classifier/
 - Detailed performance matrices for each model
 - Classification reports with all metrics
 - Model comparison and analysis
+
+### Milestone 3: Urgency Detection & Scoring
+Objective
+Implement urgency prediction using ML and rule-based approaches to prioritize critical emails.
+
+Urgency Distribution
+Urgency LevelCountPercentageMedium41,62183.2%High6,11312.2%Low2,2654.5%
+
+# Approach 1: Rule Based, ML Based and Hybrid (Rule + ML)
+Method: Rule-based for explicit signals, ML for contextual analysis
+# Hybrid Accuracy : 0.80
+
+Hybrid Classification Report:
+              precision    recall  f1-score   support
+
+        high       0.44      1.00      0.61      1223
+         low       0.45      0.68      0.54       453
+      medium       0.99      0.78      0.87      8324
+
+    accuracy                           0.80     10000
+   macro avg       0.63      0.82      0.68     10000
+weighted avg       0.90      0.80      0.83     10000
+
+# Rule Based Accuracy : 0.87
+
+ Rule-Based Classification Report:
+              precision    recall  f1-score   support
+
+        high       0.58      1.00      0.74      6113
+         low       0.47      0.30      0.37      2265
+      medium       0.97      0.88      0.92     41621
+
+    accuracy                           0.87     49999
+   macro avg       0.67      0.73      0.68     49999
+weighted avg       0.90      0.87      0.88     49999
+
+
+# ML Based Accuracy : 0.83
+
+ML-Based Classification Report:
+              precision    recall  f1-score   support
+
+        high       0.51      0.78      0.61      1223
+         low       0.42      0.81      0.56       453
+      medium       0.96      0.84      0.90      8324
+
+    accuracy                           0.83     10000
+   macro avg       0.63      0.81      0.69     10000
+weighted avg       0.88      0.83      0.85     10000
+
+
+# Approach 2: Logistic Regression
+Method: TF-IDF + Logistic Regression with class balancing
+Performance Matrix
+Urgency LevelPrecisionRecallF1-ScoreSupportHigh0.510.780.611,223Medium0.960.840.908,324Low0.420.810.56453Weighted Avg0.880.830.8510,000
+Overall Accuracy: 83.18%
+F1-Score (Weighted): 0.8482
+
+Confusion Matrix:
+Predicted
+Actual       High  Medium  Low
+High          950     68   205
+Medium         36    367    50
+Low           892    431  7001
 
 ## Acknowledgments
 - Mentor: Saadhana (Infosys Springboard)
