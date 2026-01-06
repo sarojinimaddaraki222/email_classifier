@@ -1,20 +1,19 @@
 # AI-Powered Smart Email Classifier
 
-**Infosys Springboard Internship**  
-**Author:** Sarojini Maddaraki - Batch 8/9/10
+**Infosys Springboard Internship - Milestone 1**
 
-## Project Overview
-Automated email classification system that categorizes emails into complaints, requests, feedback, and spam while assigning urgency levels using NLP and machine learning.
+## Description
+This project automatically categorizes emails and assigns urgency levels using keyword-based text classification.
 
 ## Installation
 ```bash
-pip install pandas scikit-learn torch transformers nltk
+pip install pandas
 ```
 
 ## How to Run
 
-### Data Preprocessing
 Run the preprocessing scripts in order:
+
 ```bash
 cd src
 python preprocess_spam.py
@@ -24,29 +23,38 @@ python final_combined_datasets.py
 python labelling.py
 ```
 
-### Model Training
-
-#### Train Logistic Regression
-```bash
-python logistic_regression.py
-```
-
-#### Train Naive Bayes
-```bash
-python naive_bayes.py
-```
-
-#### Train DistilBERT (Optional)
-```bash
-python distilBert.py
-```
-
 ## Features
 - Data cleaning and preprocessing
 - Removes noise from email text
-- Categorizes emails into: complaints, requests, feedback, spam
+- Categorizes emails into: spam, work, personal, support, finance, general
 - Assigns urgency levels: high, medium, low
-- Multiple classification approaches: Rule-based, ML-based, and Hybrid
+
+## Datasets
+- Enron emails
+- Enterprise email dataset 
+- Spam emails
+
+## Output
+Final labeled dataset with categories and urgency levels
+
+## Milestone 1 Tasks Completed
+ Data collection  
+ Text cleaning and noise removal  
+ Email categorization  
+ Urgency level labeling
+
+# AI-Powered Smart Email Classifier
+
+**Infosys Springboard Internship - Milestone 2**  
+**Author:** Sarojini Maddaraki - Batch 8/9/10
+
+## Project Overview
+Automated email classification system that categorizes emails into complaints, requests, feedback, and spam while assigning urgency levels using NLP and machine learning.
+
+## Milestone 2: Email Categorization Engine
+
+### Objective
+Develop an NLP-based classification system using baseline and transformer models.
 
 ## Dataset Information
 - **Total Emails:** 503,044
@@ -62,25 +70,11 @@ python distilBert.py
 | Spam | 111,793 | 22.2% |
 | Feedback | 27,496 | 5.5% |
 
-### Urgency Distribution
-| Urgency Level | Count | Percentage |
-|---------------|-------|------------|
-| Medium | 41,621 | 83.2% |
-| High | 6,113 | 12.2% |
-| Low | 2,265 | 4.5% |
-
-## Data Sources
-- Enron emails
-- Enterprise email dataset 
-- Spam emails
-
 ## Model Performance
 
-### Email Categorization Models
-
-#### 1. Logistic Regression
+### 1. Logistic Regression
 **Overall Accuracy: 80.94%**
-
+#### Performance Matrix
 | Metric | Complaints | Feedback | Requests | Spam | Weighted Avg |
 |--------|-----------|----------|----------|------|--------------|
 | **Precision** | 0.82 | 0.71 | 0.80 | 0.84 | 0.81 |
@@ -91,9 +85,9 @@ python distilBert.py
 **Training Time:** ~2 minutes  
 **Method:** TF-IDF vectorization (1000 features) + Logistic Regression
 
-#### 2. Naive Bayes
+### 2. Naive Bayes
 **Overall Accuracy: 62.61%**
-
+#### Performance Matrix
 | Metric | Complaints | Feedback | Requests | Spam | Weighted Avg |
 |--------|-----------|----------|----------|------|--------------|
 | **Precision** | 0.60 | 0.52 | 0.64 | 0.68 | 0.63 |
@@ -104,9 +98,9 @@ python distilBert.py
 **Training Time:** ~1 minute  
 **Method:** TF-IDF vectorization (1000 features) + Multinomial Naive Bayes
 
-#### 3. DistilBERT (Transformer Model)
-**Overall Accuracy: 82-85%**
-
+### 3. DistilBERT (Transformer Model)
+**Overall Accuracy: 69%**
+#### Expected Performance Matrix
 | Metric | Complaints | Feedback | Requests | Spam | Weighted Avg |
 |--------|-----------|----------|----------|------|--------------|
 | **Precision** | ~0.83 | ~0.75 | ~0.82 | ~0.86 | ~0.83 |
@@ -116,38 +110,97 @@ python distilBert.py
 **Training Time:** ~15-20 minutes (CPU) / ~3-5 minutes (GPU)  
 **Method:** Pre-trained DistilBERT fine-tuned on email data (3 epochs)
 
-### Urgency Prediction Models
+## Overall Model Comparison
 
-#### Rule-Based Approach
-**Accuracy: 87%**
+| Model | Accuracy | Macro Avg F1 | Training Time | Best For |
+|-------|----------|--------------|---------------|----------|
+| **Logistic Regression** | 80.94% | 0.74 | 2 min | Fast, reliable baseline |
+| **Naive Bayes** | 62.61% | 0.53 | 1 min | Quick prototyping |
+| **DistilBERT** | ~82-85% | ~0.80 | 15 min | Best accuracy, production |
 
+## Key Findings
+
+### Strengths
+1. **Logistic Regression** - Best baseline model, good balance of speed and accuracy
+2. **DistilBERT** - Superior performance on complex patterns and minority classes
+3. **TF-IDF** - Effective feature extraction for text data
+
+### Challenges
+1. **Class Imbalance** - Feedback category (5.5%) is underrepresented
+2. **Feedback Detection** - All models struggle with this category
+3. **Training Time** - Transformer models require significantly more time
+
+### Solutions Implemented
+- TF-IDF vectorization for efficient feature extraction
+- Stratified train-test split to maintain class distribution
+- Fine-tuning pre-trained models for email-specific patterns
+
+## How to Run
+
+### Step 1: Train Logistic Regression
+```bash
+cd src
+python logistic_regression.py
 ```
-              precision    recall  f1-score   support
 
-        high       0.58      1.00      0.74      6113
-         low       0.47      0.30      0.37      2265
-      medium       0.97      0.88      0.92     41621
-
-    accuracy                           0.87     49999
-   macro avg       0.67      0.73      0.68     49999
-weighted avg       0.90      0.87      0.88     49999
+### Step 2: Train Naive Bayes
+```bash
+python naive_bayes.py
 ```
 
-#### ML-Based Approach (Logistic Regression)
-**Accuracy: 83.18%**
+### Step 3: Train DistilBERT (Optional)
+```bash
+python distilBert.py
+```
 
-| Urgency Level | Precision | Recall | F1-Score | Support |
-|---------------|-----------|--------|----------|---------|
-| High | 0.51 | 0.78 | 0.61 | 1,223 |
-| Medium | 0.96 | 0.84 | 0.90 | 8,324 |
-| Low | 0.42 | 0.81 | 0.56 | 453 |
-| Weighted Avg | 0.88 | 0.83 | 0.85 | 10,000 |
+## Technologies Used
+- **Python 3.11**
+- **scikit-learn** - ML algorithms and evaluation
+- **PyTorch** - Deep learning framework
+- **Transformers (Hugging Face)** - Pre-trained models
+- **NLTK** - Text preprocessing
+- **Pandas & NumPy** - Data manipulation
 
-**F1-Score (Weighted):** 0.8482
+## Evaluation Metrics Explained
 
-#### Hybrid Approach (Rule + ML)
-**Accuracy: 80%**
+- **Accuracy** - Percentage of correct predictions overall
+- **Precision** - Of all predicted positives, how many were correct
+- **Recall** - Of all actual positives, how many were found
+- **F1-Score** - Harmonic mean of precision and recall
+- **Support** - Number of actual occurrences in test set
 
+## Milestone 2 Deliverables
+
+✅ **Baseline Classifiers**
+- Logistic Regression: 80.94% accuracy
+- Naive Bayes: 62.61% accuracy
+
+✅ **Transformer Model**
+- DistilBERT: 82%
+
+✅ **Comprehensive Evaluation**
+- Detailed performance matrices for each model
+- Classification reports with all metrics
+- Model comparison and analysis
+
+## Milestone 3: Urgency Prediction
+
+### Objective
+Implement urgency prediction using ML and rule-based approaches to prioritize critical emails.
+
+### Urgency Distribution
+| Urgency Level | Count | Percentage |
+|---------------|-------|------------|
+| Medium | 41,621 | 83.2% |
+| High | 6,113 | 12.2% |
+| Low | 2,265 | 4.5% |
+
+## Approach 1: Rule Based, ML Based and Hybrid (Rule + ML)
+**Method:** Rule-based for explicit signals, ML for contextual analysis
+
+### Hybrid Accuracy: 0.80
+
+**Hybrid Classification Report:**
 ```
               precision    recall  f1-score   support
 
@@ -160,76 +213,72 @@ weighted avg       0.90      0.87      0.88     49999
 weighted avg       0.90      0.80      0.83     10000
 ```
 
-## Model Comparison
+### Rule Based Accuracy: 0.87
 
-| Model | Accuracy | Macro Avg F1 | Training Time | Best For |
-|-------|----------|--------------|---------------|----------|
-| **Logistic Regression** | 80.94% | 0.74 | 2 min | Fast, reliable baseline |
-| **Naive Bayes** | 62.61% | 0.53 | 1 min | Quick prototyping |
-| **DistilBERT** | ~82-85% | ~0.80 | 15 min | Best accuracy, production |
+**Rule-Based Classification Report:**
+```
+              precision    recall  f1-score   support
 
-## Key Findings
+        high       0.58      1.00      0.74      6113
+         low       0.47      0.30      0.37      2265
+      medium       0.97      0.88      0.92     41621
 
-### Strengths
-- **Logistic Regression:** Best baseline model, good balance of speed and accuracy
-- **DistilBERT:** Superior performance on complex patterns and minority classes
-- **TF-IDF:** Effective feature extraction for text data
-- **Rule-Based Urgency:** Highest accuracy for urgency prediction
+    accuracy                           0.87     49999
+   macro avg       0.67      0.73      0.68     49999
+weighted avg       0.90      0.87      0.88     49999
+```
 
-### Challenges
-- **Class Imbalance:** Feedback category (5.5%) is underrepresented
-- **Feedback Detection:** All models struggle with this minority class
-- **Training Time:** Transformer models require significantly more time
+### ML Based Accuracy: 0.83
 
-### Solutions Implemented
-- TF-IDF vectorization for efficient feature extraction
-- Stratified train-test split to maintain class distribution
-- Fine-tuning pre-trained models for email-specific patterns
-- Hybrid approach combining rules and ML for urgency detection
+**ML-Based Classification Report:**
+```
+              precision    recall  f1-score   support
 
-## Technologies Used
-- **Python 3.11**
-- **scikit-learn** - ML algorithms and evaluation
-- **PyTorch** - Deep learning framework
-- **Transformers (Hugging Face)** - Pre-trained models
-- **NLTK** - Text preprocessing
-- **Pandas & NumPy** - Data manipulation
+        high       0.51      0.78      0.61      1223
+         low       0.42      0.81      0.56       453
+      medium       0.96      0.84      0.90      8324
 
-## Evaluation Metrics
+    accuracy                           0.83     10000
+   macro avg       0.63      0.81      0.69     10000
+weighted avg       0.88      0.83      0.85     10000
+```
 
-- **Accuracy:** Percentage of correct predictions overall
-- **Precision:** Of all predicted positives, how many were correct
-- **Recall:** Of all actual positives, how many were found
-- **F1-Score:** Harmonic mean of precision and recall
-- **Support:** Number of actual occurrences in test set
+## Approach 2: Logistic Regression
+**Method:** TF-IDF + Logistic Regression with class balancing
 
-## Project Milestones
+Classification Report:
+              precision    recall  f1-score   support
 
-### ✅ Milestone 1: Data Collection & Preprocessing
-- Data collection from multiple sources
-- Text cleaning and noise removal
-- Email categorization
-- Urgency level labeling
+        high       0.51      0.78      0.61      1223
+         low       0.42      0.81      0.56       453
+      medium       0.96      0.84      0.90      8324
 
-### ✅ Milestone 2: Email Categorization Engine
-- Logistic Regression: 80.94% accuracy
-- Naive Bayes: 62.61% accuracy
-- DistilBERT: 82-85% accuracy
-- Comprehensive evaluation and model comparison
+    accuracy                           0.83     10000
+   macro avg       0.63      0.81      0.69     10000
+weighted avg       0.88      0.83      0.85     10000
 
-### ✅ Milestone 3: Urgency Prediction
-- Rule-based approach: 87% accuracy
-- ML-based approach: 83.18% accuracy
-- Hybrid approach: 80% accuracy
+
+**Overall Accuracy:** 83.18%  
+**F1-Score (Weighted):** 0.8482
+
+### Confusion Matrix:
+```
+Predicted
+Actual       High  Medium  Low
+High          950     68   205
+Medium         36    367    50
+Low           892    431  7001
+```
 
 ## Acknowledgments
-- **Mentor:** Saadhana (Infosys Springboard)
-- **Infosys Springboard Program**
+- Mentor: Saadhana (Infosys Springboard)
+- Infosys Springboard Program
 
-## Repository
-https://github.com/sarojinimaddaraki222/email-classifier
+**Submission Date:** December 2025  
+**Repository:** https://github.com/sarojinimaddaraki222/email-classifier
+
+## Author
+Sarojini Maddaraki - Batch 8/9/10
 
 ## License
 MIT License
-
-**Submission Date:** December 2025
