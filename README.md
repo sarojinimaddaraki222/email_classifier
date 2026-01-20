@@ -260,6 +260,11 @@ High          950     68   205
 Medium         36    367    50
 Low           892    431  7001
 ```
+## Milestone 4
+Streamlit Web Application
+
+Deployment link : https://emailclassifier-nwey8am4r6z9z43yy2ncnu.streamlit.app/
+
 
 ## Acknowledgments
 - Mentor: Saadhana (Infosys Springboard)
