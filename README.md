@@ -10,18 +10,9 @@ This project automatically categorizes emails and assigns urgency levels using k
 pip install pandas
 ```
 
-## How to Run
+## Deployment Link : https://emailclassifier-nwey8am4r6z9z43yy2ncnu.streamlit.app/
 
-Run the preprocessing scripts in order:
 
-```bash
-cd src
-python preprocess_spam.py
-python preprocess_emails(enron).py
-python preprocess_enterprise_email_dataset.py
-python final_combined_datasets.py
-python labelling.py
-```
 
 ## Features
 - Data cleaning and preprocessing
