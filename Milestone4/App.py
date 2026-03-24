@@ -1,437 +1,603 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime, timedelta
-import json
+import { useState, useEffect, useRef } from "react";
 
-# Page config
-st.set_page_config(
-    page_title="AI Email Classification System",
-    page_icon="📧",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+const INITIAL_EMAILS = [
+  {
+    id: 1,
+    subject: "URGENT: Payment system completely down",
+    body: "Our payment system is not working since 3am. We're losing thousands of dollars per hour. This is a critical emergency.",
+    category: "complaint",
+    urgency: "high",
+    confidence: 0.96,
+    sentiment: "negative",
+    summary: "Critical payment system outage causing major revenue loss.",
+    timestamp: new Date(Date.now() - 2 * 3600000),
+    tags: ["outage", "revenue", "critical"],
+  },
+  {
+    id: 2,
+    subject: "Feature Request: Dark mode please!",
+    body: "Would love to see dark mode added to the dashboard. It would really help during late-night sessions.",
+    category: "request",
+    urgency: "low",
+    confidence: 0.88,
+    sentiment: "positive",
+    summary: "User requesting dark mode feature for nighttime use.",
+    timestamp: new Date(Date.now() - 5 * 3600000),
+    tags: ["ui", "feature", "accessibility"],
+  },
+  {
+    id: 3,
+    subject: "Amazing customer support experience!",
+    body: "Thank you for the excellent support from your team. Sarah was incredibly helpful and resolved my issue in minutes.",
+    category: "feedback",
+    urgency: "low",
+    confidence: 0.94,
+    sentiment: "positive",
+    summary: "Positive feedback praising quick support resolution.",
+    timestamp: new Date(Date.now() - 24 * 3600000),
+    tags: ["praise", "support", "team"],
+  },
+  {
+    id: 4,
+    subject: "Congratulations! You've won $5,000,000!!",
+    body: "Click here now to claim your prize. This offer expires in 24 hours. Act immediately!",
+    category: "spam",
+    urgency: "low",
+    confidence: 0.99,
+    sentiment: "neutral",
+    summary: "Obvious spam email with lottery scam.",
+    timestamp: new Date(Date.now() - 30 * 60000),
+    tags: ["scam", "lottery"],
+  },
+];
 
-# Custom CSS
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
-    }
-    .sub-header {
-        font-size: 1rem;
-        color: #6b7280;
-        margin-bottom: 2rem;
-    }
-    .metric-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    }
-    .stButton>button {
-        background-color: #2563eb;
-        color: white;
-        border-radius: 0.5rem;
-        padding: 0.5rem 1.5rem;
-        font-weight: 500;
-        border: none;
-        width: 100%;
-    }
-    .stButton>button:hover {
-        background-color: #1d4ed8;
-    }
-    .badge-complaint {
-        background-color: #fee2e2;
-        color: #991b1b;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .badge-request {
-        background-color: #dbeafe;
-        color: #1e40af;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .badge-feedback {
-        background-color: #dcfce7;
-        color: #15803d;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .badge-spam {
-        background-color: #f3f4f6;
-        color: #374151;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .urgency-high {
-        background-color: #ef4444;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .urgency-medium {
-        background-color: #f59e0b;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .urgency-low {
-        background-color: #22c55e;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-    .success-box {
-        background: linear-gradient(to right, #eff6ff, #f0fdf4);
-        border: 2px solid #bfdbfe;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin: 1rem 0;
-    }
-</style>
-""", unsafe_allow_html=True)
+const CATEGORY_CONFIG = {
+  complaint: { color: "#e24b4a", bg: "#fcebeb", label: "Complaint", icon: "⚠" },
+  request: { color: "#185fa5", bg: "#e6f1fb", label: "Request", icon: "✦" },
+  feedback: { color: "#3b6d11", bg: "#eaf3de", label: "Feedback", icon: "★" },
+  spam: { color: "#5f5e5a", bg: "#f1efe8", label: "Spam", icon: "✕" },
+};
 
-# Classification keywords
-CATEGORY_KEYWORDS = {
-    'spam': ['win', 'prize', 'click here', 'congratulations', 'free money', 'viagra', 'lottery', 'act now'],
-    'complaint': ['not working', 'error', 'issue', 'problem', 'broken', 'failed', 'disappointed', 'angry', 'frustrated', 'terrible', 'worst'],
-    'feedback': ['thank', 'great', 'excellent', 'awesome', 'love', 'appreciate', 'wonderful', 'amazing', 'happy'],
-    'request': ['please', 'could you', 'can you', 'would like', 'need', 'want', 'help', 'request', 'feature']
+const URGENCY_CONFIG = {
+  high: { color: "#a32d2d", bg: "#f7c1c1", label: "High", dot: "#e24b4a" },
+  medium: { color: "#854f0b", bg: "#fac775", label: "Medium", dot: "#ef9f27" },
+  low: { color: "#3b6d11", bg: "#c0dd97", label: "Low", dot: "#639922" },
+};
+
+function timeAgo(date) {
+  const diff = (Date.now() - date) / 1000;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
 }
 
-URGENCY_KEYWORDS = {
-    'high': ['urgent', 'asap', 'immediately', 'critical', 'emergency', 'not working', 'down', 'failed', 'broken', 'deadline today', 'rush', 'important', 'serious', 'crisis'],
-    'medium': ['soon', 'please', 'request', 'help', 'issue', 'problem', 'this week', 'follow up', 'reminder', 'when possible'],
-    'low': ['fyi', 'information', 'no rush', 'when you can', 'whenever', 'just checking', 'heads up', 'for your reference']
+function MiniBar({ value, color }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ flex: 1, height: 4, background: "#f1efe8", borderRadius: 99 }}>
+        <div
+          style={{
+            width: `${value * 100}%`,
+            height: "100%",
+            background: color,
+            borderRadius: 99,
+            transition: "width 0.6s ease",
+          }}
+        />
+      </div>
+      <span style={{ fontSize: 11, color: "#888780", minWidth: 28 }}>
+        {Math.round(value * 100)}%
+      </span>
+    </div>
+  );
 }
 
-# Initialize session state
-if 'emails' not in st.session_state:
-    st.session_state.emails = [
-        {
-            'id': 1,
-            'subject': 'URGENT: System Down',
-            'body': 'Our payment system is not working...',
-            'category': 'complaint',
-            'urgency': 'high',
-            'confidence_category': 0.85,
-            'confidence_urgency': 0.90,
-            'timestamp': datetime.now() - timedelta(hours=2)
-        },
-        {
-            'id': 2,
-            'subject': 'Feature Request',
-            'body': 'Would love to see dark mode...',
-            'category': 'request',
-            'urgency': 'low',
-            'confidence_category': 0.75,
-            'confidence_urgency': 0.80,
-            'timestamp': datetime.now() - timedelta(hours=5)
-        },
-        {
-            'id': 3,
-            'subject': 'Great Service!',
-            'body': 'Thank you for the excellent support...',
-            'category': 'feedback',
-            'urgency': 'low',
-            'confidence_category': 0.88,
-            'confidence_urgency': 0.75,
-            'timestamp': datetime.now() - timedelta(days=1)
-        }
-    ]
+function CategoryPill({ category }) {
+  const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.spam;
+  return (
+    <span
+      style={{
+        background: cfg.bg,
+        color: cfg.color,
+        fontSize: 11,
+        fontWeight: 500,
+        padding: "3px 9px",
+        borderRadius: 99,
+        letterSpacing: "0.02em",
+      }}
+    >
+      {cfg.icon} {cfg.label}
+    </span>
+  );
+}
 
-if 'classification_result' not in st.session_state:
-    st.session_state.classification_result = None
+function UrgencyDot({ urgency }) {
+  const cfg = URGENCY_CONFIG[urgency] || URGENCY_CONFIG.medium;
+  return (
+    <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      <span
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: cfg.dot,
+          display: "inline-block",
+          flexShrink: 0,
+        }}
+      />
+      <span style={{ fontSize: 11, color: "#5f5e5a" }}>{cfg.label}</span>
+    </span>
+  );
+}
 
-# Classification function
-def classify_email(subject, body):
-    text = f"{subject} {body}".lower()
-    
-    # Classify Category
-    category_scores = {
-        'spam': 0,
-        'complaint': 0,
-        'feedback': 0,
-        'request': 0
+function DonutChart({ data }) {
+  const total = data.reduce((s, d) => s + d.count, 0) || 1;
+  let offset = 0;
+  const r = 54;
+  const cx = 70;
+  const cy = 70;
+  const circ = 2 * Math.PI * r;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+      <svg width={140} height={140} viewBox="0 0 140 140">
+        {data.map((d, i) => {
+          const pct = d.count / total;
+          const dash = pct * circ;
+          const gap = circ - dash;
+          const rot = (offset / total) * 360 - 90;
+          offset += d.count;
+          return (
+            <circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke={d.color}
+              strokeWidth={16}
+              strokeDasharray={`${dash} ${gap}`}
+              style={{ transformOrigin: `${cx}px ${cy}px`, transform: `rotate(${rot}deg)` }}
+            />
+          );
+        })}
+        <text x={cx} y={cy - 6} textAnchor="middle" fontSize={22} fontWeight={500} fill="#2c2c2a">
+          {total}
+        </text>
+        <text x={cx} y={cy + 12} textAnchor="middle" fontSize={10} fill="#888780">
+          total
+        </text>
+      </svg>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {data.map((d, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: d.color, flexShrink: 0 }} />
+            <span style={{ fontSize: 12, color: "#5f5e5a", minWidth: 60 }}>{d.label}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: "#2c2c2a" }}>{d.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TypewriterText({ text, speed = 12 }) {
+  const [displayed, setDisplayed] = useState("");
+  const idx = useRef(0);
+
+  useEffect(() => {
+    idx.current = 0;
+    setDisplayed("");
+    if (!text) return;
+    const iv = setInterval(() => {
+      idx.current++;
+      setDisplayed(text.slice(0, idx.current));
+      if (idx.current >= text.length) clearInterval(iv);
+    }, speed);
+    return () => clearInterval(iv);
+  }, [text]);
+
+  return <span>{displayed}</span>;
+}
+
+function EmailCard({ email, isNew }) {
+  const [expanded, setExpanded] = useState(false);
+  const cfg = CATEGORY_CONFIG[email.category] || CATEGORY_CONFIG.spam;
+
+  return (
+    <div
+      onClick={() => setExpanded(!expanded)}
+      style={{
+        background: "white",
+        border: "0.5px solid #d3d1c7",
+        borderLeft: `3px solid ${cfg.color}`,
+        borderRadius: 10,
+        padding: "14px 16px",
+        cursor: "pointer",
+        transition: "box-shadow 0.15s",
+        animation: isNew ? "slideIn 0.35s ease" : undefined,
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.08)")}
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "#2c2c2a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {email.subject}
+            </span>
+            {isNew && (
+              <span style={{ background: "#e6f1fb", color: "#185fa5", fontSize: 9, fontWeight: 500, padding: "2px 6px", borderRadius: 99, flexShrink: 0 }}>
+                NEW
+              </span>
+            )}
+          </div>
+          <p style={{ fontSize: 12, color: "#888780", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: expanded ? "normal" : "nowrap" }}>
+            {email.summary}
+          </p>
+        </div>
+        <span style={{ fontSize: 11, color: "#b4b2a9", flexShrink: 0 }}>{timeAgo(email.timestamp)}</span>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+        <CategoryPill category={email.category} />
+        <UrgencyDot urgency={email.urgency} />
+        <div style={{ flex: 1, maxWidth: 120, marginLeft: "auto" }}>
+          <MiniBar value={email.confidence} color={cfg.color} />
+        </div>
+      </div>
+
+      {expanded && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: "0.5px solid #e8e6df" }}>
+          <p style={{ fontSize: 12, color: "#5f5e5a", margin: "0 0 10px", lineHeight: 1.6 }}>{email.body}</p>
+          {email.tags && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {email.tags.map((t) => (
+                <span key={t} style={{ fontSize: 10, background: "#f1efe8", color: "#888780", padding: "2px 7px", borderRadius: 99 }}>
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  const [emails, setEmails] = useState(INITIAL_EMAILS);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [newId, setNewId] = useState(null);
+  const [filterCat, setFilterCat] = useState("all");
+  const [filterUrg, setFilterUrg] = useState("all");
+  const [search, setSearch] = useState("");
+  const [streamText, setStreamText] = useState("");
+
+  const stats = {
+    total: emails.length,
+    high: emails.filter((e) => e.urgency === "high").length,
+    complaints: emails.filter((e) => e.category === "complaint").length,
+    spam: emails.filter((e) => e.category === "spam").length,
+  };
+
+  const donutData = [
+    { label: "Complaint", count: emails.filter((e) => e.category === "complaint").length, color: "#e24b4a" },
+    { label: "Request", count: emails.filter((e) => e.category === "request").length, color: "#378add" },
+    { label: "Feedback", count: emails.filter((e) => e.category === "feedback").length, color: "#639922" },
+    { label: "Spam", count: emails.filter((e) => e.category === "spam").length, color: "#888780" },
+  ];
+
+  const filtered = emails.filter((e) => {
+    if (filterCat !== "all" && e.category !== filterCat) return false;
+    if (filterUrg !== "all" && e.urgency !== filterUrg) return false;
+    if (search && !e.subject.toLowerCase().includes(search.toLowerCase()) && !e.body.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  async function classifyEmail() {
+    if (!subject.trim() || !body.trim()) {
+      setError("Please fill in both subject and body.");
+      return;
     }
+    setError("");
+    setLoading(true);
+    setResult(null);
+    setStreamText("Analyzing email...");
 
-    for category, keywords in CATEGORY_KEYWORDS.items():
-        for keyword in keywords:
-            if keyword in text:
-                category_scores[category] += 1
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: `Classify this customer support email. Return ONLY valid JSON with no markdown, no explanation.
 
-    category = max(category_scores, key=category_scores.get)
-    category_confidence = min(0.5 + (category_scores[category] * 0.15), 0.95) if category_scores[category] > 0 else 0.4
+Subject: ${subject}
+Body: ${body}
 
-    # Classify Urgency
-    urgency = 'medium'
-    urgency_confidence = 0.5
+Return JSON exactly like this:
+{
+  "category": "complaint|request|feedback|spam",
+  "urgency": "high|medium|low",
+  "confidence": 0.0-1.0,
+  "sentiment": "positive|negative|neutral",
+  "summary": "one sentence summary",
+  "tags": ["tag1","tag2","tag3"]
+}`,
+            },
+          ],
+        }),
+      });
 
-    for keyword in URGENCY_KEYWORDS['high']:
-        if keyword in text:
-            urgency = 'high'
-            urgency_confidence = 0.9
-            break
+      const data = await response.json();
+      const text = data.content?.[0]?.text || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
 
-    if urgency != 'high':
-        for keyword in URGENCY_KEYWORDS['low']:
-            if keyword in text:
-                urgency = 'low'
-                urgency_confidence = 0.75
-                break
+      setResult(parsed);
+      setStreamText(parsed.summary);
 
-    if urgency == 'medium':
-        for keyword in URGENCY_KEYWORDS['medium']:
-            if keyword in text:
-                urgency_confidence = 0.7
-                break
-
-    if category_scores[category] == 0:
-        category = 'request'
-
-    return {
-        'category': category,
-        'urgency': urgency,
-        'confidence_category': category_confidence,
-        'confidence_urgency': urgency_confidence
+      const newEmail = {
+        id: Date.now(),
+        subject,
+        body,
+        ...parsed,
+        timestamp: new Date(),
+      };
+      setEmails((prev) => [newEmail, ...prev]);
+      setNewId(newEmail.id);
+      setSubject("");
+      setBody("");
+      setTimeout(() => setNewId(null), 5000);
+    } catch (err) {
+      setError("Classification failed. Please try again.");
+      setStreamText("");
+    } finally {
+      setLoading(false);
     }
+  }
 
-# Helper functions
-def format_timestamp(timestamp):
-    now = datetime.now()
-    diff = now - timestamp
-    
-    if diff.total_seconds() < 3600:
-        return f"{int(diff.total_seconds() / 60)}m ago"
-    elif diff.total_seconds() < 86400:
-        return f"{int(diff.total_seconds() / 3600)}h ago"
-    else:
-        return timestamp.strftime("%b %d, %Y")
+  return (
+    <div style={{ fontFamily: "system-ui, -apple-system, sans-serif", background: "#fafaf8", minHeight: "100vh" }}>
+      <style>{`
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        * { box-sizing: border-box; }
+        input, textarea, select { outline: none; font-family: inherit; }
+        input:focus, textarea:focus { border-color: #378add !important; }
+      `}</style>
 
-def get_category_badge(category):
-    badges = {
-        'complaint': 'badge-complaint',
-        'request': 'badge-request',
-        'feedback': 'badge-feedback',
-        'spam': 'badge-spam'
-    }
-    return f'<span class="{badges.get(category, "badge-spam")}">{category.capitalize()}</span>'
+      {/* Header */}
+      <div style={{ background: "white", borderBottom: "0.5px solid #d3d1c7", padding: "0 24px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 56 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 28, height: 28, background: "#2c2c2a", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "white", fontSize: 13 }}>✉</span>
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "#2c2c2a" }}>MailSense</span>
+            <span style={{ fontSize: 11, color: "#b4b2a9", marginLeft: 4 }}>AI Classification</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#639922", animation: "pulse 2s infinite", display: "inline-block" }} />
+            <span style={{ fontSize: 11, color: "#5f5e5a" }}>Claude AI active</span>
+          </div>
+        </div>
+      </div>
 
-def get_urgency_badge(urgency):
-    badges = {
-        'high': 'urgency-high',
-        'medium': 'urgency-medium',
-        'low': 'urgency-low'
-    }
-    return f'<span class="{badges.get(urgency, "urgency-medium")}">{urgency.capitalize()} Priority</span>'
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 24px" }}>
+        {/* Stat cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+          {[
+            { label: "Total Emails", value: stats.total, accent: "#2c2c2a" },
+            { label: "High Priority", value: stats.high, accent: "#e24b4a" },
+            { label: "Complaints", value: stats.complaints, accent: "#ba7517" },
+            { label: "Spam Caught", value: stats.spam, accent: "#888780" },
+          ].map((s) => (
+            <div
+              key={s.label}
+              style={{ background: "white", border: "0.5px solid #d3d1c7", borderRadius: 10, padding: "14px 16px" }}
+            >
+              <div style={{ fontSize: 11, color: "#888780", marginBottom: 6 }}>{s.label}</div>
+              <div style={{ fontSize: 28, fontWeight: 500, color: s.accent }}>{s.value}</div>
+            </div>
+          ))}
+        </div>
 
-# Header
-st.markdown('<div class="main-header">📧 AI Email Classification System</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Enterprise Customer Support Dashboard</div>', unsafe_allow_html=True)
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20 }}>
+          {/* Left column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Search & Filters */}
+            <div style={{ background: "white", border: "0.5px solid #d3d1c7", borderRadius: 10, padding: "14px 16px" }}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search emails..."
+                  style={{
+                    flex: 1,
+                    minWidth: 160,
+                    border: "0.5px solid #d3d1c7",
+                    borderRadius: 7,
+                    padding: "7px 12px",
+                    fontSize: 13,
+                    color: "#2c2c2a",
+                  }}
+                />
+                <select
+                  value={filterCat}
+                  onChange={(e) => setFilterCat(e.target.value)}
+                  style={{ border: "0.5px solid #d3d1c7", borderRadius: 7, padding: "7px 10px", fontSize: 12, color: "#5f5e5a", background: "white" }}
+                >
+                  <option value="all">All categories</option>
+                  <option value="complaint">Complaint</option>
+                  <option value="request">Request</option>
+                  <option value="feedback">Feedback</option>
+                  <option value="spam">Spam</option>
+                </select>
+                <select
+                  value={filterUrg}
+                  onChange={(e) => setFilterUrg(e.target.value)}
+                  style={{ border: "0.5px solid #d3d1c7", borderRadius: 7, padding: "7px 10px", fontSize: 12, color: "#5f5e5a", background: "white" }}
+                >
+                  <option value="all">All urgency</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+            </div>
 
-# Sidebar - Classify New Email
-with st.sidebar:
-    st.header("📨 Classify New Email")
-    
-    subject = st.text_input("Email Subject", placeholder="Enter email subject...")
-    body = st.text_area("Email Body", placeholder="Enter email body...", height=150)
-    
-    if st.button("🚀 Classify Email"):
-        if subject and body:
-            with st.spinner("Classifying..."):
-                result = classify_email(subject, body)
-                
-                # Add to emails
-                new_email = {
-                    'id': len(st.session_state.emails) + 1,
-                    'subject': subject,
-                    'body': body,
-                    'category': result['category'],
-                    'urgency': result['urgency'],
-                    'confidence_category': result['confidence_category'],
-                    'confidence_urgency': result['confidence_urgency'],
-                    'timestamp': datetime.now()
-                }
-                st.session_state.emails.insert(0, new_email)
-                st.session_state.classification_result = result
-                st.rerun()
-        else:
-            st.error("Please enter both subject and body!")
-    
-    # Show classification result
-    if st.session_state.classification_result:
-        result = st.session_state.classification_result
-        st.markdown('<div class="success-box">', unsafe_allow_html=True)
-        st.success("✅ Classification Complete!")
-        st.markdown(f"**Category:** {result['category'].capitalize()}")
-        st.markdown(f"**Confidence:** {result['confidence_category']*100:.1f}%")
-        st.markdown(f"**Urgency:** {result['urgency'].capitalize()}")
-        st.markdown(f"**Confidence:** {result['confidence_urgency']*100:.1f}%")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        if st.button("Clear Result"):
-            st.session_state.classification_result = None
-            st.rerun()
-    
-    st.divider()
-    
-    # Filters
-    st.header("🔍 Filters")
-    category_filter = st.selectbox(
-        "Category",
-        ["All", "Complaint", "Request", "Feedback", "Spam"]
-    )
-    
-    urgency_filter = st.selectbox(
-        "Urgency",
-        ["All", "High", "Medium", "Low"]
-    )
+            {/* Email list */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {filtered.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 0", color: "#b4b2a9", fontSize: 13 }}>
+                  No emails match your filters.
+                </div>
+              ) : (
+                filtered.map((email) => (
+                  <EmailCard key={email.id} email={email} isNew={email.id === newId} />
+                ))
+              )}
+            </div>
+          </div>
 
-# Main content
-# Stats Cards
-col1, col2, col3, col4 = st.columns(4)
+          {/* Right column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Classify panel */}
+            <div style={{ background: "white", border: "0.5px solid #d3d1c7", borderRadius: 10, padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "#2c2c2a", marginBottom: 12 }}>
+                Classify new email
+              </div>
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Subject line"
+                style={{
+                  width: "100%",
+                  border: "0.5px solid #d3d1c7",
+                  borderRadius: 7,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  color: "#2c2c2a",
+                  marginBottom: 8,
+                }}
+              />
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Email body..."
+                rows={5}
+                style={{
+                  width: "100%",
+                  border: "0.5px solid #d3d1c7",
+                  borderRadius: 7,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  color: "#2c2c2a",
+                  resize: "vertical",
+                  marginBottom: 10,
+                  lineHeight: 1.5,
+                }}
+              />
+              {error && <p style={{ fontSize: 11, color: "#e24b4a", marginBottom: 8 }}>{error}</p>}
+              <button
+                onClick={classifyEmail}
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  background: loading ? "#d3d1c7" : "#2c2c2a",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 7,
+                  padding: "9px 0",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "background 0.15s",
+                }}
+              >
+                {loading ? "Analyzing..." : "Classify with Claude AI"}
+              </button>
 
-with col1:
-    st.metric(
-        label="📥 Total Emails",
-        value=len(st.session_state.emails)
-    )
+              {loading && (
+                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 3 }}>
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        style={{
+                          width: 5,
+                          height: 5,
+                          borderRadius: "50%",
+                          background: "#378add",
+                          animation: `pulse 1.2s ${i * 0.2}s infinite`,
+                          display: "inline-block",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span style={{ fontSize: 11, color: "#888780" }}>Reading email content...</span>
+                </div>
+              )}
 
-with col2:
-    high_priority = len([e for e in st.session_state.emails if e['urgency'] == 'high'])
-    st.metric(
-        label="🔴 High Priority",
-        value=high_priority
-    )
+              {result && !loading && (
+                <div style={{ marginTop: 12, background: "#eaf3de", borderRadius: 8, padding: 12 }}>
+                  <div style={{ fontSize: 11, color: "#3b6d11", fontWeight: 500, marginBottom: 8 }}>
+                    ✓ Classification complete
+                  </div>
+                  <div style={{ fontSize: 12, color: "#27500a", lineHeight: 1.6 }}>
+                    <TypewriterText text={result.summary} />
+                  </div>
+                  <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+                    <CategoryPill category={result.category} />
+                    <UrgencyDot urgency={result.urgency} />
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <MiniBar value={result.confidence} color="#3b6d11" />
+                  </div>
+                </div>
+              )}
+            </div>
 
-with col3:
-    complaints = len([e for e in st.session_state.emails if e['category'] == 'complaint'])
-    st.metric(
-        label="⚠️ Complaints",
-        value=complaints
-    )
+            {/* Distribution chart */}
+            <div style={{ background: "white", border: "0.5px solid #d3d1c7", borderRadius: 10, padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "#2c2c2a", marginBottom: 14 }}>
+                Category breakdown
+              </div>
+              <DonutChart data={donutData} />
+            </div>
 
-with col4:
-    st.metric(
-        label="⏱️ Avg Response Time",
-        value="2.4h"
-    )
-
-st.divider()
-
-# Charts
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("📊 Category Distribution")
-    
-    category_counts = pd.DataFrame([
-        {'Category': 'Complaints', 'Count': len([e for e in st.session_state.emails if e['category'] == 'complaint'])},
-        {'Category': 'Requests', 'Count': len([e for e in st.session_state.emails if e['category'] == 'request'])},
-        {'Category': 'Feedback', 'Count': len([e for e in st.session_state.emails if e['category'] == 'feedback'])},
-        {'Category': 'Spam', 'Count': len([e for e in st.session_state.emails if e['category'] == 'spam'])}
-    ])
-    
-    fig_pie = px.pie(
-        category_counts,
-        values='Count',
-        names='Category',
-        color='Category',
-        color_discrete_map={
-            'Complaints': '#ef4444',
-            'Requests': '#3b82f6',
-            'Feedback': '#10b981',
-            'Spam': '#6b7280'
-        }
-    )
-    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-    st.plotly_chart(fig_pie, use_container_width=True)
-
-with col2:
-    st.subheader("📈 Urgency Levels")
-    
-    urgency_counts = pd.DataFrame([
-        {'Urgency': 'High', 'Count': len([e for e in st.session_state.emails if e['urgency'] == 'high'])},
-        {'Urgency': 'Medium', 'Count': len([e for e in st.session_state.emails if e['urgency'] == 'medium'])},
-        {'Urgency': 'Low', 'Count': len([e for e in st.session_state.emails if e['urgency'] == 'low'])}
-    ])
-    
-    fig_bar = px.bar(
-        urgency_counts,
-        x='Urgency',
-        y='Count',
-        color='Urgency',
-        color_discrete_map={
-            'High': '#dc2626',
-            'Medium': '#f59e0b',
-            'Low': '#10b981'
-        }
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-st.divider()
-
-# Email List
-st.subheader(f"📬 Classified Emails ({len(st.session_state.emails)})")
-
-# Apply filters
-filtered_emails = st.session_state.emails.copy()
-
-if category_filter != "All":
-    filtered_emails = [e for e in filtered_emails if e['category'] == category_filter.lower()]
-
-if urgency_filter != "All":
-    filtered_emails = [e for e in filtered_emails if e['urgency'] == urgency_filter.lower()]
-
-# Display emails
-for email in filtered_emails:
-    with st.container():
-        col1, col2 = st.columns([4, 1])
-        
-        with col1:
-            st.markdown(f"**{email['subject']}**")
-            st.caption(email['body'][:100] + "..." if len(email['body']) > 100 else email['body'])
-            
-            st.markdown(
-                f"{get_category_badge(email['category'])} "
-                f"{get_urgency_badge(email['urgency'])} "
-                f"<span style='color: #6b7280; font-size: 0.75rem;'>{email['confidence_category']*100:.0f}% confidence</span>",
-                unsafe_allow_html=True
-            )
-        
-        with col2:
-            st.caption(format_timestamp(email['timestamp']))
-        
-        st.divider()
-
-# Footer
-st.markdown("---")
-st.caption("🤖 Powered by Rule-Based Classification | Built with Streamlit")
+            {/* Urgency bars */}
+            <div style={{ background: "white", border: "0.5px solid #d3d1c7", borderRadius: 10, padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "#2c2c2a", marginBottom: 14 }}>
+                Urgency distribution
+              </div>
+              {["high", "medium", "low"].map((u) => {
+                const count = emails.filter((e) => e.urgency === u).length;
+                const cfg = URGENCY_CONFIG[u];
+                return (
+                  <div key={u} style={{ marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 11, color: "#5f5e5a" }}>{cfg.label}</span>
+                      <span style={{ fontSize: 11, color: "#888780" }}>{count}</span>
+                    </div>
+                    <MiniBar value={count / (emails.length || 1)} color={cfg.dot} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
