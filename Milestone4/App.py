@@ -32,10 +32,20 @@ if 'emails' not in st.session_state:
 
 # ---------------- KEYWORDS ----------------
 CATEGORY_KEYWORDS = {
-    'spam': ['win','prize','free','lottery','offer'],
-    'complaint': ['error','issue','problem','failed','not working'],
-    'feedback': ['thank','great','excellent','love'],
-    'request': ['please','need','help','request']
+    'spam': ['win','prize','free','lottery','offer','click'],
+    'complaint': [
+        'error','issue','problem','failed','not working',
+        'broken','down','crash','not responding','bug',
+        'slow','failure','unable','cannot'
+    ],
+    'feedback': [
+        'thank','great','excellent','awesome','love',
+        'amazing','happy','appreciate'
+    ],
+    'request': [
+        'please','need','help','request','could you',
+        'can you','would like'
+    ]
 }
 
 URGENCY_KEYWORDS = {
