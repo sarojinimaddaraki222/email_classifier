@@ -71,14 +71,34 @@ def classify_email(subject, body):
     return category, confidence, urgency
 
 def get_sentiment(text):
-    pos = ['good','great','happy','love']
-    neg = ['bad','error','issue','problem']
+    text = text.lower()
 
-    score = sum([1 for w in pos if w in text]) - sum([1 for w in neg if w in text])
+    positive = [
+        'good','great','happy','love','excellent','thank',
+        'helpful','awesome','amazing','appreciate','support'
+    ]
 
-    if score > 0: return "Positive"
-    if score < 0: return "Negative"
-    return "Neutral"
+    negative = [
+        'bad','worst','angry','issue','problem','error',
+        'failed','frustrated','slow','disappointed'
+    ]
+
+    score = 0
+
+    for w in positive:
+        if w in text:
+            score += 1
+
+    for w in negative:
+        if w in text:
+            score -= 1
+
+    if score > 0:
+        return "Positive"
+    elif score < 0:
+        return "Negative"
+    else:
+        return "Neutral"
 
 def generate_reply(category):
     replies = {
